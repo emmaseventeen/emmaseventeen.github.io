@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>視覺小說對話框</title>
+    <link rel="stylesheet" href="./talk.css" />
+  </head>
+  <body>
+    <!-- 整個畫面區域（點擊任意處觸發下一句） -->
+    <div class="game-screen" id="gameScreen">
+      <!-- 對話框容器 -->
+      <div class="dialogue-wrapper">
+        <!-- 角色名字標籤 -->
+        <div class="name-tag" id="speakerName">丘丘鈴</div>
+
+        <!-- 對話內容框 -->
+        <div class="dialogue-box">
+          <p class="dialogue-text" id="dialogueText"></p>
+          <!-- 右下角繼續提示三角形 -->
+          <span class="next-indicator" id="nextIndicator">▼</span>
+        </div>
+      </div>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
