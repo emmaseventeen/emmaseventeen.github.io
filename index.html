@@ -1,24 +1,320 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="zh-Hant">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>做一天就好</title>
+    <link rel="icon" type="image/png" href="" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Huninn&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="./css/talk.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
   </head>
   <body>
-    <!-- 整個畫面區域（點擊任意處觸發下一句） -->
-    <div class="game-screen" id="gameScreen">
-      <!-- 對話框容器 -->
-      <div class="dialogue-wrapper">
-        <!-- 角色名字標籤 -->
-        <div class="name-tag" id="speakerName">丘丘鈴</div>
+    <!-- ================= 第零幕：開始遊戲畫面 ================= -->
+    <div class="scene scene-start" id="sceneStart">
+      <video class="bg-video" id="startVideo" autoplay loop muted playsinline>
+        <!-- <source src="./video/your-video.mp4" type="video/mp4" /> -->
+      </video>
 
-        <!-- 對話內容框 -->
+      <div class="start-content">
+        <img
+          src="./img/做一天就好_裁切.png"
+          alt="做一天就好 LET'S GO ICE CREAM"
+          class="game-logo"
+        />
+        <button type="button" class="start-btn" id="startBtn">
+          <img src="./img/start按鍵_02.png" alt="start" />
+        </button>
+      </div>
+    </div>
+
+    <!-- ================= 第一幕：遊戲規則 / 偷偷告訴你 ================= -->
+    <div class="scene scene-one hidden" id="sceneOne">
+      <canvas id="flowerCanvas"></canvas>
+
+      <div class="dialogue-wrapper">
+        <div class="speaker-tag">偷偷告訴你</div>
+        <div class="dialogue-box">
+          <p class="dialogue-text" id="introText"></p>
+          <span class="next-indicator">▼</span>
+          <div class="timer-bar" id="timerBar"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= 第二幕：丘丘鈴劇本對話 ================= -->
+    <div class="scene scene-two hidden" id="sceneTwo">
+      <div class="dialogue-wrapper">
+        <div class="name-tag" id="speakerName">丘丘鈴</div>
         <div class="dialogue-box">
           <p class="dialogue-text" id="dialogueText"></p>
-          <!-- 右下角繼續提示三角形 -->
           <span class="next-indicator" id="nextIndicator">▼</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= 第三幕：開門轉場 + 客人點餐畫面 ================= -->
+    <div class="scene scene-three hidden" id="sceneThree">
+      <div class="order-bg-layer">
+        <img
+          src="./img/OMg.png"
+          alt="客人點餐背景與角色"
+          class="order-scene-img"
+          id="orderSceneImg"
+        />
+      </div>
+
+      <div class="customer-speech-wrapper hidden" id="customerSpeechWrapper">
+        <img
+          src="./img/顧客點餐對話框圓角_裁切.png"
+          alt="點餐對話框"
+          class="speech-bubble-img"
+        />
+        <div class="speech-text-area">
+          <p class="speech-text" id="orderDialogueText"></p>
+          <span class="speech-next-indicator" id="orderNextIndicator">▼</span>
+        </div>
+      </div>
+
+      <div class="door-overlay" id="doorOverlay">
+        <img class="door door-left" src="./img/門_左.png" alt="" />
+        <img class="door door-right" src="./img/門_右.png" alt="" />
+      </div>
+    </div>
+
+    <!-- ================= 第四幕：擠冰淇淋規則說明頁 ================= -->
+    <div id="rules-screen" class="screen">
+      <img id="rules-screen-bg" src="./img/規則說明背景.png" alt="背景圖" />
+
+      <div class="rules-wrapper">
+        <img
+          id="rules-bg-png"
+          src="./img/規則說明廚師帽.png"
+          alt="規則介紹圖"
+        />
+
+        <button
+          id="start-icecream-btn"
+          class="start-img-btn"
+          type="button"
+          aria-label="開始製作冰淇淋吧！"
+        >
+          <img
+            id="start-btn-png"
+            src="./img/開始製作吧_按鍵.png"
+            alt="開始製作冰淇淋吧！"
+          />
+        </button>
+      </div>
+    </div>
+
+    <!-- ================= 第五幕：製作冰淇淋主畫面 ================= -->
+    <div id="game-screen" class="screen">
+      <img id="game-screen-bg" src="./img/擠冰_背景.png" alt="製作頁面背景圖" />
+
+      <div class="flavor-controls">
+        <div class="flavor-group-left">
+          <button
+            class="flavor-btn"
+            data-flavor="matcha"
+            style="background-color: #6b8e67"
+          >
+            抹茶
+          </button>
+          <button
+            class="flavor-btn"
+            data-flavor="chocolate"
+            style="background-color: #6d4c4c"
+          >
+            巧克力
+          </button>
+        </div>
+        <div class="flavor-group-right">
+          <button
+            class="flavor-btn"
+            data-flavor="strawberry"
+            style="background-color: #eda8e2"
+          >
+            草莓
+          </button>
+          <button
+            class="flavor-btn"
+            data-flavor="mango"
+            style="background-color: #ffd54f; color: #555"
+          >
+            芒果
+          </button>
+        </div>
+      </div>
+
+      <div id="round-indicator">第 1 / 3 層 (最下層)</div>
+      <div id="judgment-popup" class="hidden">EXCELLENT!</div>
+
+      <div id="play-area">
+        <div class="zone-png-container">
+          <img
+            id="zone-blue-png"
+            src="./img/藍色區域.png"
+            alt="藍色區域(Poor)"
+          />
+          <img
+            id="zone-pink-png"
+            src="./img/粉色區域.png"
+            alt="粉色區域(Excellent)"
+          />
+          <img
+            id="zone-yellow-png"
+            src="./img/黃色區域.png"
+            alt="淡黃色區域(Good)"
+          />
+        </div>
+
+        <canvas id="star-canvas"></canvas>
+        <div id="three-container"></div>
+      </div>
+
+      <div class="bottom-bar">
+        <div id="time-fill"></div>
+        <span id="time-text">剩餘時間：30s</span>
+      </div>
+    </div>
+
+    <!-- ================= 第六幕：製作完成畫面 ================= -->
+    <div id="completion-screen" class="screen">
+      <img
+        id="completion-bg-png"
+        src="./img/製作完成廚師帽.png"
+        alt="冰淇淋製作完成"
+      />
+      <button
+        id="next-stage-btn"
+        class="next-stage-img-btn"
+        type="button"
+        aria-label="前往裝飾冰淇淋"
+      >
+        <img src="./img/前往製作冰淇淋_按鍵.png" alt="前往裝飾冰淇淋" />
+      </button>
+    </div>
+
+    <!-- ================= 第七幕：裝飾冰淇淋頁面 ================= -->
+    <div id="decorate-screen" class="screen">
+      <!-- 紅色警鈴臨檢全螢幕閃爍遮罩 -->
+      <div id="police-alarm-overlay" class="hidden"></div>
+
+      <!-- 躲避狀態壓暗遮罩 -->
+      <div id="hide-state-overlay" class="hidden">
+        <div class="hide-status-badge">躲避中...等待警察離開</div>
+      </div>
+
+      <!-- 左側 46.5%：名為「食材.png」的料台底圖 + 對應 5x4 共 20 格透明拖曳感應區 -->
+      <div class="prep-counter-area">
+        <img id="prep-counter-png" src="./img/食材.png" alt="20種食材料台" />
+
+        <div id="topping-tray" class="topping-tray">
+          <!-- 第 1 排：花花棉花糖 曲奇餅乾 綠葡萄 火龍果 鳳梨 -->
+          <div
+            class="tray-slot"
+            data-topping="flowermarshmallow"
+            title="花花棉花糖"
+          ></div>
+          <div class="tray-slot" data-topping="cookie" title="曲奇餅乾"></div>
+          <div class="tray-slot" data-topping="greengrape" title="綠葡萄"></div>
+          <div
+            class="tray-slot"
+            data-topping="dragonfruit"
+            title="火龍果"
+          ></div>
+          <div class="tray-slot" data-topping="pineapple" title="鳳梨"></div>
+
+          <!-- 第 2 排：草莓 貓爪 藍莓 夾心餅乾 小熊軟糖 -->
+          <div class="tray-slot" data-topping="strawberry" title="草莓"></div>
+          <div class="tray-slot" data-topping="catpaw" title="貓爪"></div>
+          <div class="tray-slot" data-topping="blueberry" title="藍莓"></div>
+          <div class="tray-slot" data-topping="sandwich" title="夾心餅乾"></div>
+          <div
+            class="tray-slot"
+            data-topping="beargummy"
+            title="小熊軟糖"
+          ></div>
+
+          <!-- 第 3 排：脆迪酥 愛心軟糖 yy巧克力 小幽靈 星星糖 -->
+          <div class="tray-slot" data-topping="chocostick" title="脆迪酥"></div>
+          <div
+            class="tray-slot"
+            data-topping="heartgummy"
+            title="愛心軟糖"
+          ></div>
+          <div class="tray-slot" data-topping="yychoco" title="yy巧克力"></div>
+          <div class="tray-slot" data-topping="ghost" title="小幽靈"></div>
+          <div class="tray-slot" data-topping="starcandy" title="星星糖"></div>
+
+          <!-- 第 4 排：香蕉 哈密瓜 奇異果 櫻桃 游泳圈 -->
+          <div class="tray-slot" data-topping="banana" title="香蕉"></div>
+          <div class="tray-slot" data-topping="melon" title="哈密瓜"></div>
+          <div class="tray-slot" data-topping="kiwi" title="奇異果"></div>
+          <div class="tray-slot" data-topping="cherry" title="櫻桃"></div>
+          <div class="tray-slot" data-topping="swimring" title="游泳圈"></div>
+        </div>
+      </div>
+
+      <!-- 右側 53.5%：垂直條紋冰淇淋展示區 + 躲避 / 出餐按鈕 + 底部計時條 -->
+      <div class="icecream-stage-area">
+        <!-- 5秒顧客需求提示視窗 -->
+        <div id="order-reminder-banner" class="hidden">
+          <div class="reminder-title">顧客需求提示</div>
+          <div id="order-reminder-text" class="reminder-content"></div>
+        </div>
+
+        <!-- 躲避與出餐 PNG 按鍵 -->
+        <div class="decorate-controls">
+          <button
+            id="hide-btn"
+            class="decorate-img-btn"
+            type="button"
+            aria-label="躲避"
+          >
+            <img src="./img/躲避_按鍵.png" alt="躲避" />
+          </button>
+          <button
+            id="serve-btn"
+            class="decorate-img-btn"
+            type="button"
+            aria-label="出餐"
+          >
+            <img src="./img/出餐_按鍵.png" alt="出餐" />
+          </button>
+        </div>
+
+        <!-- 右側底部 45 秒粉紅倒數計時條 -->
+        <div class="bottom-bar decorate-bottom-bar">
+          <div id="decorate-time-fill"></div>
+          <span id="decorate-time-text">剩餘時間：45s</span>
+        </div>
+      </div>
+
+      <div id="decorate-toast" class="hidden"></div>
+
+      <!-- 3D 渲染畫布容器（覆蓋全螢幕以支援從左側拖曳 3D 模型到右側冰淇淋） -->
+      <div id="decorate-three-container"></div>
+
+      <!-- 遊戲失敗提示彈窗（未及時躲避時顯示） -->
+      <div id="decorate-fail-modal" class="hidden">
+        <div class="fail-card">
+          <h2>被警察發現了！</h2>
+          <p>紅燈臨檢時沒有趕緊躲避，任務失敗。</p>
+          <button
+            id="decorate-fail-restart-btn"
+            class="restart-pill-btn"
+            type="button"
+          >
+            重新開始
+          </button>
         </div>
       </div>
     </div>
